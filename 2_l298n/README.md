@@ -28,6 +28,73 @@ This uses every safe output-capable GPIO, so no spare pins remain.
 * Power: motor battery -> both L298N 12 V terminals (size battery and wiring for four motors' stall current); ESP32 from its own regulated 5 V. **All grounds common** (battery, L298N, ESP32, sensors). Never drive a motor from a GPIO. The L298N drops roughly 1.4-2 V, so the motors see less than the battery voltage.
 * MPU6050: mount flat, Z axis up, rigid, close to the centre of rotation.
 
+## Wiring diagram (proposed pins)
+```
+                         +-----------------------+
+   MPU6050  SDA ---------| GPIO21                |
+            SCL ---------| GPIO22      ESP32     |--- GPIO5  --> Front HC-SR04 TRIG
+            VCC 3V3, GND | 3V3/GND     DevKit V1 |--- GPIO34 <-- Front ECHO (via 1k/2k divider)
+                         |                       |--- GPIO14 --> Left  HC-SR04 TRIG
+                         |                       |--- GPIO35 <-- Left  ECHO (via 1k/2k divider)
+                         |                       |
+   L298N #1 (front)      |                       |    L298N #2 (rear)
+   ENA <-----------------| GPIO25      GPIO16 ---|--> ENA
+   IN1 <-----------------| GPIO26      GPIO17 ---|--> IN1
+   IN2 <-----------------| GPIO27      GPIO18 ---|--> IN2
+   ENB <-----------------| GPIO33      GPIO19 ---|--> ENB
+   IN3 <-----------------| GPIO32      GPIO23 ---|--> IN3
+   IN4 <-----------------| GPIO13      GPIO4  ---|--> IN4
+                         +-----------------------+
+   OUT1/2 = front-left motor   OUT3/4 = front-right motor   (driver #1)
+   OUT1/2 = rear-left motor    OUT3/4 = rear-right motor    (driver #2)
+
+   Echo divider:  ECHO --[1k]--+--> ESP32 GPIO        Power: battery -> both L298N 12V
+                               |                             ESP32 own 5V supply
+                             [2k]                            ALL GROUNDS COMMON
+                               |
+                              GND
+```
+
+## If your real wiring differs: what to change in the code
+The firmware never hard-codes pins outside two files. Change only these, then recompile and re-upload (see setup guide).
+
+| What differs | File and place | What to edit |
+|---|---|---|
+| Any GPIO (sensors, I2C, L298N inputs/enables) | `config.h`, section `Pins (ESP32 DevKit V1)` | Change the `constexpr uint8_t kPin...` numbers |
+| Pin rejected at compile time | `config.h`, bottom, `outputOk()` and the `static_assert`s | Use an output-capable GPIO (4, 5, 13, 14, 16-19, 21-23, 25-27, 32, 33). Echo pins must be input-only 34/35/36/39 unless you also edit the `inputOnly` assert. Avoid GPIO 0, 2, 6-12, 15 |
+| A motor spins the wrong way | `config.h`, `kInvertFrontLeft/FrontRight/RearLeft/RearRight` | Flip that flag to `true` |
+| Motors are on different sides or different order | `2_l298n.ino`, table `kMotors[]` | Each row is `{EN pin, IN1 pin, IN2 pin, leftSide, invert, name}`; set `leftSide` true for left-side motors |
+| Fewer or more motors | `2_l298n.ino`, table `kMotors[]` and matching pins in `config.h` | Add or remove rows (each needs an EN PWM pin and two IN pins) |
+| Turns go the wrong way / heading decreases when turning left | `config.h`, `kGyroZSign` | Change to `-1` |
+| MPU6050 address is 0x69 | `config.h`, `kImuAddr` | Set `0x69` |
+| Sensors mounted or scaled differently | `config.h`, `kWallTargetCm`, `kFrontStopCm` | Distances are measured from the sensor face |
+| Motors too weak / too fast | `config.h`, `kPwmMin`, `kPwmMax`, `kCruiseSpeed`, `kTurnMinSpeed` | See the tuning guide below |
+
+Do not edit `nav_core.h` for wiring changes; it contains only navigation logic and has no pin numbers.
+
+### Prompt to give ChatGPT (copy, then fill the brackets)
+```
+I have an ESP32 DevKit V1 Arduino project (Arduino-ESP32 core 3.x) at
+https://github.com/tandonayaan-glitch/agastya in the folder 2_l298n. It is a
+left-wall-following robot with 2 L298N drivers (4 motors), 2 HC-SR04 sensors
+and an MPU6050. Pin numbers live ONLY in 2_l298n/config.h (section "Pins") and
+the motor table kMotors[] in 2_l298n/2_l298n.ino. Do not change nav_core.h.
+
+My real wiring is:
+- MPU6050 SDA=[..] SCL=[..]
+- Front HC-SR04 TRIG=[..] ECHO=[..]   Left HC-SR04 TRIG=[..] ECHO=[..]
+- Driver 1: ENA=[..] IN1=[..] IN2=[..] ENB=[..] IN3=[..] IN4=[..]
+  motor on A = [front-left], motor on B = [front-right]
+- Driver 2: ENA=[..] IN1=[..] IN2=[..] ENB=[..] IN3=[..] IN4=[..]
+  motor on A = [rear-left], motor on B = [rear-right]
+- Motors that spin backwards: [list, or none]
+
+Update config.h and kMotors[] to match. Keep the static_asserts valid (use only
+ESP32-safe GPIOs; echo pins must be input-only or have a voltage divider),
+tell me which lines you changed, and confirm it still compiles with:
+arduino-cli compile --fqbn esp32:esp32:esp32doit-devkit-v1 2_l298n
+```
+
 ## Complete setup guide (fresh computer, nothing installed)
 This code was written and only compile-checked on a different machine, so follow every step below in order.
 
