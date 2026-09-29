@@ -77,7 +77,7 @@ Do not edit `nav_core.h` for wiring changes; it contains only navigation logic a
 ### Prompt to give ChatGPT (copy, then fill the brackets)
 ```
 I have an ESP32 DevKit V1 Arduino project (Arduino-ESP32 core 3.x) at
-https://github.com/tandonayaan-glitch/agastya in the folder Robomaze_2026. It is a
+https://github.com/tandonayaan-glitch/RoboMaze_KA.AP in the folder Robomaze_2026. It is a
 left-wall-following robot with 2 L298N drivers (4 motors), 2 HC-SR04 sensors
 and an MPU6050. Pin numbers live ONLY in Robomaze_2026/config.h (section "Pins") and
 the motor table kMotors[] in Robomaze_2026/Robomaze_2026.ino. Do not change nav_core.h.
@@ -102,8 +102,8 @@ This code was written and only compile-checked on a different machine, so follow
 
 **1. Get the code**
 ```
-git clone https://github.com/tandonayaan-glitch/agastya
-cd agastya
+git clone https://github.com/tandonayaan-glitch/RoboMaze_KA.AP
+cd RoboMaze_KA.AP
 ```
 
 **2. Install Arduino CLI** (Windows: `winget install ArduinoSA.CLI`; macOS: `brew install arduino-cli`; Linux: see arduino.github.io/arduino-cli). Check it with `arduino-cli version`.
