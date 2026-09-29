@@ -1,15 +1,13 @@
 # Change the GPIO pins with ChatGPT (copy-paste prompt)
 
-Use this when your wiring is different from the pins in the code. You paste the prompt, attach two files, fill in your pins,
+Use this when your wiring is different from the pins in the code. You upload the whole project ZIP, paste the prompt, fill in your pins,
 and ChatGPT gives you back the edited files.
 
 ## Steps
 1. Pick your version (folder): `Robomaze_2026` (base), `Robomaze_colour_sensors` (+ colour sensor) or `Robomaze_with_encoders` (+ colour sensor + encoders).
-2. Open ChatGPT and start a new chat. Attach (or paste the text of) these two files from that folder:
-   * `config.h`
-   * the `.ino` file (same name as the folder, e.g. `Robomaze_with_encoders.ino`)
+2. Get the project as a ZIP (GitHub: green **Code** button > **Download ZIP**). Open ChatGPT, start a new chat and upload the **entire ZIP** - it already contains the READMEs, this file and all versions, so ChatGPT can read the instructions itself.
 3. Copy the whole prompt below, fill in ONLY the values in `[square brackets]`, and send it. Leave a pin as `same` if you did not change it.
-4. Replace your two files with the ones ChatGPT returns (Arduino IDE: open the `.ino`, keep the four files in the one folder).
+4. Replace your two files (`config.h` and the `.ino`) with the ones ChatGPT returns (Arduino IDE: open the `.ino`, keep the four files in the one folder).
 5. Compile and upload (`arduino-cli compile --fqbn esp32:esp32:esp32doit-devkit-v1 <folder>` or the Arduino IDE with board "DOIT ESP32 DEVKIT V1").
 6. Bench-test before driving: set `BENCH_MOTOR_TEST 1` in `config.h`, upload with the wheels off the ground, check each motor spins forward, flip its `kInvert...` flag if not, then set it back to `0`.
 
@@ -17,7 +15,9 @@ and ChatGPT gives you back the edited files.
 
 ```
 You are helping me adapt an ESP32 DevKit V1 (Arduino-ESP32 core 3.x) robot firmware to MY wiring.
-I attached config.h and the main .ino from the project (repo: https://github.com/tandonayaan-glitch/RoboMaze_KA.AP).
+I uploaded the whole project ZIP (repo: https://github.com/tandonayaan-glitch/RoboMaze_KA.AP). It contains the folders
+Robomaze_2026, Robomaze_colour_sensors and Robomaze_with_encoders (each has config.h and a .ino named like the folder),
+plus READMEs. Read the README of my version first, then work ONLY in the folder for my version.
 Project: left-wall-following maze robot, 2x HC-SR04, MPU6050 (I2C), TB/L298N motor drivers.
 Optional parts depending on my version: TCS34725 colour sensor (I2C, shares SDA/SCL, no extra pins) and
 2 wheel encoders (one left, one right, single channel).
