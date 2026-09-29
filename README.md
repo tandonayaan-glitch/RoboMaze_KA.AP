@@ -30,33 +30,6 @@ This uses every safe output-capable GPIO, so no spare pins remain.
 * Power: motor battery -> both L298N 12 V terminals (size battery and wiring for four motors' stall current); ESP32 from its own regulated 5 V. **All grounds common** (battery, L298N, ESP32, sensors). Never drive a motor from a GPIO. The L298N drops roughly 1.4-2 V, so the motors see less than the battery voltage.
 * MPU6050: mount flat, Z axis up, rigid, close to the centre of rotation.
 
-## Wiring diagram (proposed pins)
-```
-                         +-----------------------+
-   MPU6050  SDA ---------| GPIO21                |
-            SCL ---------| GPIO22      ESP32     |--- GPIO5  --> Front HC-SR04 TRIG
-            VCC 3V3, GND | 3V3/GND     DevKit V1 |--- GPIO34 <-- Front ECHO (via 1k/2k divider)
-                         |                       |--- GPIO14 --> Left  HC-SR04 TRIG
-                         |                       |--- GPIO35 <-- Left  ECHO (via 1k/2k divider)
-                         |                       |
-   L298N #1 (front)      |                       |    L298N #2 (rear)
-   ENA <-----------------| GPIO25      GPIO16 ---|--> ENA
-   IN1 <-----------------| GPIO26      GPIO17 ---|--> IN1
-   IN2 <-----------------| GPIO27      GPIO18 ---|--> IN2
-   ENB <-----------------| GPIO33      GPIO19 ---|--> ENB
-   IN3 <-----------------| GPIO32      GPIO23 ---|--> IN3
-   IN4 <-----------------| GPIO13      GPIO4  ---|--> IN4
-                         +-----------------------+
-   OUT1/2 = front-left motor   OUT3/4 = front-right motor   (driver #1)
-   OUT1/2 = rear-left motor    OUT3/4 = rear-right motor    (driver #2)
-
-   Echo divider:  ECHO --[1k]--+--> ESP32 GPIO        Power: battery -> both L298N 12V
-                               |                             ESP32 own 5V supply
-                             [2k]                            ALL GROUNDS COMMON
-                               |
-                              GND
-```
-
 ## If your real wiring differs: what to change in the code
 The firmware never hard-codes pins outside two files. Change only these, then recompile and re-upload (see setup guide).
 
