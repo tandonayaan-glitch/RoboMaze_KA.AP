@@ -1,6 +1,6 @@
-# 2_l298n - ESP32 left-wall-following robot (two L298N, four motors)
+# Robomaze_2026 - ESP32 left-wall-following robot (two L298N, four motors)
 
-Self-contained project (no shared files with `1_l298n`). Board: **ESP32 DevKit V1**, Arduino-ESP32 core 3.3.x.
+Self-contained project. Board: **ESP32 DevKit V1**, Arduino-ESP32 core 3.3.x.
 No external Arduino libraries: the MPU6050 is driven directly over `Wire`.
 
 ## Read first: what is verified and what is proposed
@@ -63,8 +63,8 @@ The firmware never hard-codes pins outside two files. Change only these, then re
 | Any GPIO (sensors, I2C, L298N inputs/enables) | `config.h`, section `Pins (ESP32 DevKit V1)` | Change the `constexpr uint8_t kPin...` numbers |
 | Pin rejected at compile time | `config.h`, bottom, `outputOk()` and the `static_assert`s | Use an output-capable GPIO (4, 5, 13, 14, 16-19, 21-23, 25-27, 32, 33). Echo pins must be input-only 34/35/36/39 unless you also edit the `inputOnly` assert. Avoid GPIO 0, 2, 6-12, 15 |
 | A motor spins the wrong way | `config.h`, `kInvertFrontLeft/FrontRight/RearLeft/RearRight` | Flip that flag to `true` |
-| Motors are on different sides or different order | `2_l298n.ino`, table `kMotors[]` | Each row is `{EN pin, IN1 pin, IN2 pin, leftSide, invert, name}`; set `leftSide` true for left-side motors |
-| Fewer or more motors | `2_l298n.ino`, table `kMotors[]` and matching pins in `config.h` | Add or remove rows (each needs an EN PWM pin and two IN pins) |
+| Motors are on different sides or different order | `Robomaze_2026.ino`, table `kMotors[]` | Each row is `{EN pin, IN1 pin, IN2 pin, leftSide, invert, name}`; set `leftSide` true for left-side motors |
+| Fewer or more motors | `Robomaze_2026.ino`, table `kMotors[]` and matching pins in `config.h` | Add or remove rows (each needs an EN PWM pin and two IN pins) |
 | Turns go the wrong way / heading decreases when turning left | `config.h`, `kGyroZSign` | Change to `-1` |
 | MPU6050 address is 0x69 | `config.h`, `kImuAddr` | Set `0x69` |
 | Sensors mounted or scaled differently | `config.h`, `kWallTargetCm`, `kFrontStopCm` | Distances are measured from the sensor face |
@@ -75,10 +75,10 @@ Do not edit `nav_core.h` for wiring changes; it contains only navigation logic a
 ### Prompt to give ChatGPT (copy, then fill the brackets)
 ```
 I have an ESP32 DevKit V1 Arduino project (Arduino-ESP32 core 3.x) at
-https://github.com/tandonayaan-glitch/agastya in the folder 2_l298n. It is a
+https://github.com/tandonayaan-glitch/agastya in the folder Robomaze_2026. It is a
 left-wall-following robot with 2 L298N drivers (4 motors), 2 HC-SR04 sensors
-and an MPU6050. Pin numbers live ONLY in 2_l298n/config.h (section "Pins") and
-the motor table kMotors[] in 2_l298n/2_l298n.ino. Do not change nav_core.h.
+and an MPU6050. Pin numbers live ONLY in Robomaze_2026/config.h (section "Pins") and
+the motor table kMotors[] in Robomaze_2026/Robomaze_2026.ino. Do not change nav_core.h.
 
 My real wiring is:
 - MPU6050 SDA=[..] SCL=[..]
@@ -92,7 +92,7 @@ My real wiring is:
 Update config.h and kMotors[] to match. Keep the static_asserts valid (use only
 ESP32-safe GPIOs; echo pins must be input-only or have a voltage divider),
 tell me which lines you changed, and confirm it still compiles with:
-arduino-cli compile --fqbn esp32:esp32:esp32doit-devkit-v1 2_l298n
+arduino-cli compile --fqbn esp32:esp32:esp32doit-devkit-v1 Robomaze_2026
 ```
 
 ## Complete setup guide (fresh computer, nothing installed)
@@ -117,13 +117,13 @@ It was compiled with esp32:esp32 3.3.11. Confirm with `arduino-cli core list`.
 
 **4. (Optional) run the unit tests on the computer, no robot needed.** Install any C++ compiler (Windows: `winget install BrechtSanders.WinLibs.POSIX.UCRT`, macOS: Xcode command-line tools, Linux: `sudo apt install g++`), then:
 ```
-bash 2_l298n/test/run_tests.sh
+bash Robomaze_2026/test/run_tests.sh
 ```
 Expect the last line `N checks passed, 0 failed`. If anything fails, do not flash: fix or report it first.
 
 **5. Compile:**
 ```
-arduino-cli compile --fqbn esp32:esp32:esp32doit-devkit-v1 --warnings all 2_l298n
+arduino-cli compile --fqbn esp32:esp32:esp32doit-devkit-v1 --warnings all Robomaze_2026
 ```
 
 **6. Wire the robot** exactly as in the wiring table below (or edit pins in `config.h` first, then recompile). Lift the robot so the wheels are OFF the ground.
@@ -131,7 +131,7 @@ arduino-cli compile --fqbn esp32:esp32:esp32doit-devkit-v1 --warnings all 2_l298
 **7. Find the port and upload.** Plug in the ESP32 by USB (install the CP210x or CH340 USB driver if no port appears):
 ```
 arduino-cli board list
-arduino-cli upload --fqbn esp32:esp32:esp32doit-devkit-v1 -p COM3 2_l298n
+arduino-cli upload --fqbn esp32:esp32:esp32doit-devkit-v1 -p COM3 Robomaze_2026
 ```
 Replace `COM3` with your port (Linux/macOS: `/dev/ttyUSB0` or similar). If upload hangs at "Connecting...", hold the BOOT button on the board until it starts writing.
 
@@ -139,7 +139,7 @@ Replace `COM3` with your port (Linux/macOS: `/dev/ttyUSB0` or similar). If uploa
 ```
 arduino-cli monitor -p COM3 -c baudrate=115200
 ```
-You should see `2_l298n wall follower booting`, then state changes. Type `x` + Enter at any time to stop the robot.
+You should see `Robomaze_2026 wall follower booting`, then state changes. Type `x` + Enter at any time to stop the robot.
 
 **9. Do the first power-up procedure below** (motor test, gyro sign, calibration) before the first floor run.
 
@@ -155,15 +155,15 @@ You should see `2_l298n wall follower booting`, then state changes. Type `x` + E
 ## Build and upload (quick reference)
 ```
 arduino-cli core install esp32:esp32
-arduino-cli compile --fqbn esp32:esp32:esp32doit-devkit-v1 --warnings all 2_l298n
-arduino-cli upload  --fqbn esp32:esp32:esp32doit-devkit-v1 -p COM<N> 2_l298n
+arduino-cli compile --fqbn esp32:esp32:esp32doit-devkit-v1 --warnings all Robomaze_2026
+arduino-cli upload  --fqbn esp32:esp32:esp32doit-devkit-v1 -p COM<N> Robomaze_2026
 arduino-cli monitor -p COM<N> -c baudrate=115200
 ```
 `sketch.yaml` already sets the FQBN. **Flash only with the wheels off the ground.**
 
 ## Host unit tests
 ```
-bash 2_l298n/test/run_tests.sh      # needs any g++ on PATH
+bash Robomaze_2026/test/run_tests.sh      # needs any g++ on PATH
 ```
 They cover the 7 cm / 9 cm thresholds, range filtering, invalid readings, opening confirmation and hysteresis,
 left / right / 180 decisions, 90 and 180 degree turn completion, tolerance boundary, overshoot correction,

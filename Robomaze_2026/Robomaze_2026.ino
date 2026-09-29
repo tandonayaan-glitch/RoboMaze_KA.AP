@@ -1,4 +1,4 @@
-// 2_l298n - ESP32 DevKit V1 left-wall-following robot, TWO L298N drivers (4 independently driven motors).
+// Robomaze_2026 - ESP32 DevKit V1 left-wall-following robot, TWO L298N drivers (4 independently driven motors).
 // Sensors: 2x HC-SR04 (front, left), MPU6050 gyro (Z axis). No encoders are assumed.
 // Logic lives in nav_core.h (host-tested); this file is the hardware layer.
 #include <Arduino.h>
@@ -321,7 +321,7 @@ void setup() {
   Serial.setTxBufferSize(1024);
   Serial.begin(115200);                                // 2. diagnostics
   delay(200);
-  Serial.println("\n2_l298n wall follower booting");
+  Serial.println("\nRobomaze_2026 wall follower booting");
 #if BENCH_MOTOR_TEST
   benchMotorTest();
 #endif
