@@ -28,7 +28,64 @@ This uses every safe output-capable GPIO, so no spare pins remain.
 * Power: motor battery -> both L298N 12 V terminals (size battery and wiring for four motors' stall current); ESP32 from its own regulated 5 V. **All grounds common** (battery, L298N, ESP32, sensors). Never drive a motor from a GPIO. The L298N drops roughly 1.4-2 V, so the motors see less than the battery voltage.
 * MPU6050: mount flat, Z axis up, rigid, close to the centre of rotation.
 
-## Build and upload (Arduino CLI)
+## Complete setup guide (fresh computer, nothing installed)
+This code was written and only compile-checked on a different machine, so follow every step below in order.
+
+**1. Get the code**
+```
+git clone https://github.com/tandonayaan-glitch/agastya
+cd agastya
+```
+
+**2. Install Arduino CLI** (Windows: `winget install ArduinoSA.CLI`; macOS: `brew install arduino-cli`; Linux: see arduino.github.io/arduino-cli). Check it with `arduino-cli version`.
+
+**3. Install the ESP32 board package** (no other libraries are needed; MPU6050 and HC-SR04 are driven directly):
+```
+arduino-cli config init
+arduino-cli config add board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+arduino-cli core update-index
+arduino-cli core install esp32:esp32
+```
+It was compiled with esp32:esp32 3.3.11. Confirm with `arduino-cli core list`.
+
+**4. (Optional) run the unit tests on the computer, no robot needed.** Install any C++ compiler (Windows: `winget install BrechtSanders.WinLibs.POSIX.UCRT`, macOS: Xcode command-line tools, Linux: `sudo apt install g++`), then:
+```
+bash 2_l298n/test/run_tests.sh
+```
+Expect the last line `N checks passed, 0 failed`. If anything fails, do not flash: fix or report it first.
+
+**5. Compile:**
+```
+arduino-cli compile --fqbn esp32:esp32:esp32doit-devkit-v1 --warnings all 2_l298n
+```
+
+**6. Wire the robot** exactly as in the wiring table below (or edit pins in `config.h` first, then recompile). Lift the robot so the wheels are OFF the ground.
+
+**7. Find the port and upload.** Plug in the ESP32 by USB (install the CP210x or CH340 USB driver if no port appears):
+```
+arduino-cli board list
+arduino-cli upload --fqbn esp32:esp32:esp32doit-devkit-v1 -p COM3 2_l298n
+```
+Replace `COM3` with your port (Linux/macOS: `/dev/ttyUSB0` or similar). If upload hangs at "Connecting...", hold the BOOT button on the board until it starts writing.
+
+**8. Open the serial monitor:**
+```
+arduino-cli monitor -p COM3 -c baudrate=115200
+```
+You should see `2_l298n wall follower booting`, then state changes. Type `x` + Enter at any time to stop the robot.
+
+**9. Do the first power-up procedure below** (motor test, gyro sign, calibration) before the first floor run.
+
+**Troubleshooting**
+* `IMU init FAILED` / `no response on I2C`: check SDA=21, SCL=22, 3.3 V, GND, AD0 low.
+* `SENSOR_FAULT sensor check failed`: robot must start still, parallel to a wall on the left within 30 cm, with an object within 2 m ahead; check both echo dividers and trigger pins.
+* `IMU calibration failed`: robot moved or vibrated during the 1.5 s calibration; keep it still.
+* `turn failed repeatedly` / `WrongWay`: gyro sign wrong (`kGyroZSign`), motors inverted (`kInvert...`), or `kTurnMinSpeed` / `kPwmMin` too low to rotate the robot.
+* Robot does nothing and prints `SAFE_STOP`: read the reason printed after `STATE ->`; faults are latched, power-cycle to retry.
+* Motors whine but don't turn: raise `kPwmMin`. Motors too fast/hit walls: lower `kCruiseSpeed`.
+* After editing `config.h` always recompile and upload again.
+
+## Build and upload (quick reference)
 ```
 arduino-cli core install esp32:esp32
 arduino-cli compile --fqbn esp32:esp32:esp32doit-devkit-v1 --warnings all 2_l298n
