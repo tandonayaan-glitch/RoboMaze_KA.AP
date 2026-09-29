@@ -1,5 +1,7 @@
 # Robomaze_2026 - ESP32 left-wall-following robot (two L298N, four motors)
 
+**Repo layout:** `Robomaze_2026/` holds ONLY the four Arduino sketch files (open or import this folder in the Arduino IDE; the folder name must match `Robomaze_2026.ino`). `README.md` and `test/` (host unit tests) live outside it so they never interfere with the sketch.
+
 Self-contained project. Board: **ESP32 DevKit V1**, Arduino-ESP32 core 3.3.x.
 No external Arduino libraries: the MPU6050 is driven directly over `Wire`.
 
@@ -117,7 +119,7 @@ It was compiled with esp32:esp32 3.3.11. Confirm with `arduino-cli core list`.
 
 **4. (Optional) run the unit tests on the computer, no robot needed.** Install any C++ compiler (Windows: `winget install BrechtSanders.WinLibs.POSIX.UCRT`, macOS: Xcode command-line tools, Linux: `sudo apt install g++`), then:
 ```
-bash Robomaze_2026/test/run_tests.sh
+bash test/run_tests.sh
 ```
 Expect the last line `N checks passed, 0 failed`. If anything fails, do not flash: fix or report it first.
 
@@ -159,11 +161,11 @@ arduino-cli compile --fqbn esp32:esp32:esp32doit-devkit-v1 --warnings all Roboma
 arduino-cli upload  --fqbn esp32:esp32:esp32doit-devkit-v1 -p COM<N> Robomaze_2026
 arduino-cli monitor -p COM<N> -c baudrate=115200
 ```
-`sketch.yaml` already sets the FQBN. **Flash only with the wheels off the ground.**
+The FQBN is always passed explicitly. **Flash only with the wheels off the ground.**
 
 ## Host unit tests
 ```
-bash Robomaze_2026/test/run_tests.sh      # needs any g++ on PATH
+bash test/run_tests.sh      # needs any g++ on PATH
 ```
 They cover the 7 cm / 9 cm thresholds, range filtering, invalid readings, opening confirmation and hysteresis,
 left / right / 180 decisions, 90 and 180 degree turn completion, tolerance boundary, overshoot correction,

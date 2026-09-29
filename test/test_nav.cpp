@@ -1,7 +1,7 @@
 // Host unit tests for nav_core.h. Build/run: see README (test/run_tests.sh).
 #include <stdio.h>
 #include <string.h>
-#include "../nav_core.h"
+#include "../Robomaze_2026/nav_core.h"
 
 using namespace nav;
 
