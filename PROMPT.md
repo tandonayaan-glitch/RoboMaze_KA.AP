@@ -4,7 +4,7 @@ Use this when your wiring is different from the pins in the code. You upload the
 and ChatGPT gives you back the edited files.
 
 ## Steps
-1. Pick your version (folder): `Robomaze_2026` (base), `Robomaze_colour_sensors` (+ colour sensor) or `Robomaze_with_encoders` (+ colour sensor + encoders).
+1. Pick your version (folder): `Robomaze_2026` (base), `Robomaze_colour_sensors` (+ colour sensor) `Robomaze_with_encoders` (+ colour sensor + encoders) or `Robomaze_3_ultrasonics` (+ colour sensor + a third, right-facing ultrasonic, no encoders).
 2. Get the project as a ZIP (GitHub: green **Code** button > **Download ZIP**). Open ChatGPT, start a new chat and upload the **entire ZIP** - it already contains the READMEs, this file and all versions, so ChatGPT can read the instructions itself.
 3. Copy the whole prompt below, fill in ONLY the values in `[square brackets]`, and send it. Leave a pin as `same` if you did not change it.
 4. Replace your two files (`config.h` and the `.ino`) with the ones ChatGPT returns (Arduino IDE: open the `.ino`, keep the four files in the one folder).
@@ -16,7 +16,7 @@ and ChatGPT gives you back the edited files.
 ```
 You are helping me adapt an ESP32 DevKit V1 (Arduino-ESP32 core 3.x) robot firmware to MY wiring.
 I uploaded the whole project ZIP (repo: https://github.com/tandonayaan-glitch/RoboMaze_KA.AP). It contains the folders
-Robomaze_2026, Robomaze_colour_sensors and Robomaze_with_encoders (each has config.h and a .ino named like the folder),
+Robomaze_2026, Robomaze_colour_sensors, Robomaze_with_encoders and Robomaze_3_ultrasonics (each has config.h and a .ino named like the folder),
 plus READMEs. Read the README of my version first, then work ONLY in the folder for my version.
 Project: left-wall-following maze robot, 2x HC-SR04, MPU6050 (I2C), TB/L298N motor drivers.
 Optional parts depending on my version: TCS34725 colour sensor (I2C, shares SDA/SCL, no extra pins) and
@@ -31,7 +31,8 @@ WHERE THINGS LIVE
   (kPinSda, kPinScl, kPinFrontTrig, kPinFrontEcho, kPinLeftTrig, kPinLeftEcho,
    kPinD1EnA, kPinD1In1, kPinD1In2, kPinD1EnB, kPinD1In3, kPinD1In4,
    kPinD2EnA, kPinD2In1, kPinD2In2, kPinD2EnB, kPinD2In3, kPinD2In4 (only if 2 drivers),
-   kPinEncLeft, kPinEncRight (only in the encoders version)).
+   kPinEncLeft, kPinEncRight (only in the encoders version),
+   kPinRightTrig, kPinRightEcho (only in the 3-ultrasonics version)).
 - Motor table: the kMotors[] array in the .ino. Each row is
   { EN pin, IN1 pin, IN2 pin, leftSide (true = left side of the robot), invert, "NAME" }.
   Keep the rows referencing the kPin... constants; only change leftSide/invert/name if my wiring needs it.
@@ -39,7 +40,7 @@ WHERE THINGS LIVE
 - I2C address: kImuAddr (MPU6050, 0x68 or 0x69) and kColorAddr (TCS34725, 0x29) - change only if I say so.
 
 ESP32 PIN RULES YOU MUST ENFORCE (config.h has static_asserts for these)
-- Outputs (TRIG, EN, IN pins) must be one of: 4, 5, 13, 14, 16, 17, 18, 19, 21, 22, 23, 25, 26, 27, 32, 33.
+- Outputs (TRIG, EN, IN pins) must be one of: 4, 5, 13, 14, 16, 17, 18, 19, 21, 22, 23, 25, 26, 27, 32, 33 (GPIO 15 is also accepted, but only in the 3-ultrasonics version).
 - Input-only pins (echo pins and encoder pins) must be one of: 34, 35, 36, 39. (If I need an echo/encoder
   on a different pin, tell me it needs a code change to the inputOnly() check and explain the risk.)
 - Never use GPIO 0, 1, 2, 3, 6-12, 15 (boot/flash/UART pins) for anything.
@@ -48,7 +49,7 @@ ESP32 PIN RULES YOU MUST ENFORCE (config.h has static_asserts for these)
 - HC-SR04 ECHO is 5 V: remind me if I did not say I use a voltage divider (1k + 2k) or level shifter.
 - If two functions clash or a pin is illegal, DO NOT guess: tell me which pins clash and suggest free legal pins.
 
-MY VERSION: [Robomaze_2026 | Robomaze_colour_sensors | Robomaze_with_encoders]
+MY VERSION: [Robomaze_2026 | Robomaze_colour_sensors | Robomaze_with_encoders | Robomaze_3_ultrasonics]
 NUMBER OF L298N DRIVERS: [1 | 2]
 
 MY WIRING (GPIO numbers; write "same" to keep the default)
@@ -59,6 +60,7 @@ MY WIRING (GPIO numbers; write "same" to keep the default)
     motor on channel A is: [front-left | left side]   motor on channel B is: [front-right | right side]
 - Driver 2 (skip if 1 driver): ENA: [ ]  IN1: [ ]  IN2: [ ]  ENB: [ ]  IN3: [ ]  IN4: [ ]
     motor on channel A is: [rear-left]   motor on channel B is: [rear-right]
+- Right HC-SR04 TRIG: [same]   ECHO: [same]   (only 3-ultrasonics version)
 - Encoders (only encoders version): left encoder pin: [same]   right encoder pin: [same]
 - Motors that spin BACKWARDS when told to go forward: [none | list names]
 - Anything else that differs (I2C addresses etc.): [none]
@@ -86,6 +88,7 @@ Do not invent features. If something in my message is ambiguous, ask me before c
 | Driver 2 ENA / IN1 / IN2 (2-driver versions) | 16 / 17 / 18 |
 | Driver 2 ENB / IN3 / IN4 (2-driver versions) | 19 / 23 / 4 |
 | Left / right encoder (encoders version) | 36 / 39 |
+| Right HC-SR04 TRIG / ECHO (3-ultrasonics version) | 15 / 36 |
 
 ## Check ChatGPT's answer
 * No pin appears twice in `config.h`.
