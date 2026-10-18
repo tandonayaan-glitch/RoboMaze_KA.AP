@@ -1,4 +1,4 @@
-// Robomaze_3_ultrasonics - ESP32 DevKit V1 left-wall follower with TCS34725 floor-colour handling (black hole, silver checkpoint, blue wait, red danger zone).
+// Robomaze_3_ultrasonics - ESP32 DevKit V1 left-wall follower with APDS-9960 floor-colour handling (black hole, silver checkpoint, blue wait, red danger zone).
 // Sensors: 2x HC-SR04 (front, left), MPU6050 gyro (Z axis). No encoders are assumed.
 // Logic lives in nav_core.h (host-tested); this file is the hardware layer.
 #include <Arduino.h>
@@ -294,7 +294,7 @@ static void calibrationStep(uint32_t nowMs) {
 }
 }  // namespace imu
 
-// ================================ TCS34725 floor colour sensor ================================
+// ================================ APDS-9960 floor colour sensor ================================
 namespace colour {
 static bool ok = false;
 static uint8_t fails = 0;
@@ -307,11 +307,11 @@ static Preferences prefs;
 static const char* const kKeys[5] = {"black", "silver", "blue", "red", "floor"};
 
 static bool writeReg(uint8_t reg, uint8_t v) {
-  Wire.beginTransmission(kColorAddr); Wire.write(0x80 | reg); Wire.write(v);
+  Wire.beginTransmission(kColorAddr); Wire.write(reg); Wire.write(v);
   return Wire.endTransmission() == 0;
 }
 static bool readRegs(uint8_t reg, uint8_t* buf, uint8_t n) {
-  Wire.beginTransmission(kColorAddr); Wire.write(0xA0 | reg);   // auto-increment
+  Wire.beginTransmission(kColorAddr); Wire.write(reg);   // APDS-9960 auto-increments, no command bit
   if (Wire.endTransmission(false) != 0) return false;
   if (Wire.requestFrom((int)kColorAddr, (int)n) != n) return false;
   for (uint8_t i = 0; i < n; ++i) buf[i] = Wire.read();
@@ -319,7 +319,7 @@ static bool readRegs(uint8_t reg, uint8_t* buf, uint8_t n) {
 }
 static bool readSample(nav::ColorSample& s) {
   uint8_t b[8];
-  if (!readRegs(0x14, b, 8)) return false;
+  if (!readRegs(0x94, b, 8)) return false;
   s.c = (uint16_t)(b[0] | (b[1] << 8));
   s.r = (uint16_t)(b[2] | (b[3] << 8));
   s.g = (uint16_t)(b[4] | (b[5] << 8));
@@ -345,15 +345,15 @@ static void loadRefs() {
 static bool begin() {
   loadRefs();
   uint8_t id = 0;
-  if (!readRegs(0x12, &id, 1) || (id != 0x44 && id != 0x4D)) {
-    Serial.printf("COLOUR: TCS34725 not found (ID read 0x%02X)\n", id);
+  if (!readRegs(0x92, &id, 1) || (id != 0xAB && id != 0x9C)) {
+    Serial.printf("COLOUR: APDS-9960 not found (ID read 0x%02X)\n", id);
     return false;
   }
-  bool r = writeReg(0x01, kColorAtime);
-  r &= writeReg(0x0F, kColorGain);
-  r &= writeReg(0x00, 0x01);            // power on
+  bool r = writeReg(0x81, kColorAtime);
+  r &= writeReg(0x8F, kColorGain);
+  r &= writeReg(0x80, 0x01);            // power on
   delay(3);
-  r &= writeReg(0x00, 0x03);            // power on + RGBC enable
+  r &= writeReg(0x80, 0x03);            // power on + ALS/colour enable
   ok = r;
   lastGoodMs = millis();
   return r;

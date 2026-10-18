@@ -1,4 +1,4 @@
-# Robomaze_3_ultrasonics - wall follower + TCS34725 floor colours + THIRD (right) ultrasonic, no encoders (2x L298N, 4 motors)
+# Robomaze_3_ultrasonics - wall follower + APDS-9960 floor colours + THIRD (right) ultrasonic, no encoders (2x L298N, 4 motors)
 
 Everything from the colour version (`Robomaze_colour_sensors`): left-wall following at 9 cm, 7 cm front stop, gyro turns,
 left-opening detection, fault handling, and the floor-colour rules (black hole, silver checkpoint, blue 5 s wait with
@@ -53,7 +53,7 @@ Assumptions to confirm: blue is waited on every visit (`kBlueWaitEveryVisit`); "
 the flag; colours are ignored while spinning.
 
 ## Colour sensor wiring and calibration
-TCS34725 on the shared I2C bus (SDA 21, SCL 22, address 0x29, VIN 3V3, LED pin to 3V3). Mount at the front, 3-5 mm above the
+APDS-9960 on the shared I2C bus (SDA 21, SCL 22, address 0x39, VIN 3V3, on-board LED on). Mount at the front, 3-5 mm above the
 floor, pointing down, shielded from ambient light, ahead of the front axle.
 Calibrate the reference colours (mandatory): reset the board, send `c` within 5 s of `Send 'c' ...`, place the sensor at
 mounting height over a tile and send `B` black, `S` silver, `U` blue, `R` red, `F` normal floor (stored in flash);
@@ -62,7 +62,7 @@ mounting height over a tile and send `B` black, `S` silver, `U` blue, `R` red, `
 ## Complete pin table (proposed - edit `config.h` if your wiring differs)
 | Function | GPIO |
 |---|---|
-| MPU6050 + TCS34725 (I2C) SDA / SCL | 21 / 22 |
+| MPU6050 + APDS-9960 (I2C) SDA / SCL | 21 / 22 |
 | Front HC-SR04 TRIG / ECHO | 5 / 34 |
 | Left HC-SR04 TRIG / ECHO | 14 / 35 |
 | Right HC-SR04 TRIG / ECHO | 15 / 36 |

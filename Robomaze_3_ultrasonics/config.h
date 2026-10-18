@@ -136,12 +136,12 @@ constexpr float kDecelPerSec = 5.0f;
 constexpr uint32_t kBrakeMs = 100;
 constexpr uint32_t kReverseDwellMs = 20;
 
-// ------------------------------- TCS34725 floor colour sensor -------------------------------
-// I2C (shares SDA/SCL with the MPU6050, address 0x29). Mount 3-5 mm above the floor, looking down,
-// at the FRONT of the robot, shielded from ambient light. Tie its LED pin to 3V3 (always on).
+// ------------------------------- APDS-9960 floor colour sensor -------------------------------
+// I2C (shares SDA/SCL with the MPU6050, address 0x39). Mount 3-5 mm above the floor, looking down,
+// at the FRONT of the robot, shielded from ambient light. Use a module with its own illumination LED (or add a white LED) for consistent lighting.
 constexpr bool kColorRequired = true;        // true: no colour sensor / stale colour = SENSOR_FAULT (holes are undetectable)
-constexpr uint8_t kColorAddr = 0x29;
-constexpr uint8_t kColorAtime = 0xF6;        // 24 ms integration
+constexpr uint8_t kColorAddr = 0x39;
+constexpr uint8_t kColorAtime = 0xF6;        // ~28 ms integration
 constexpr uint8_t kColorGain = 0x01;         // 4x
 constexpr uint32_t kColorPollMs = 30;
 constexpr uint32_t kColorStaleMs = 300;
